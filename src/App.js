@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import logo from './logo.svg';
 import './App.css';
+import ProductsList from './components/products/ProductsList';
 
 class App extends Component {
     constructor() {
@@ -22,7 +23,7 @@ class App extends Component {
                 .then((data) => {
                     this.setState({
                         loading: false,
-                        products: data
+                        products: data['data'][0]['amazon_data']
                     })
                 })
 
@@ -30,10 +31,22 @@ class App extends Component {
 
     render() {
         const data = this.state.loading ? "Loading" : this.state.products;
-        console.log(data)
-        return (
-            <h1>data</h1>
-        );
+        if(data === "Loading") {
+            return (
+                <h1>Loading...</h1>
+            )
+        }
+        else if (data !== "Loading" && Object.keys(data).length === 0) {
+            return (
+                <h1>Sorry, the API server seems to be down!</h1>
+            )
+        }
+        else if(data !== "Loading" && Object.keys(data).length !== 0) {
+            console.log(data)
+            return (
+                <ProductsList />
+            );
+        }
     }
 }
 
