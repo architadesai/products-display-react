@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import logo from './logo.svg';
 import './App.css';
-import ProductsList from './components/products/ProductsList';
+import Products from './components/products/Products';
+
 
 class App extends Component {
     constructor() {
@@ -26,14 +26,13 @@ class App extends Component {
                         products: data['data'][0]['amazon_data']
                     })
                 })
-
     }
 
     render() {
         const data = this.state.loading ? "Loading" : this.state.products;
         if(data === "Loading") {
             return (
-                <h1>Loading...</h1>
+                <h1 className="text-center" style={{ marginTop: '15%' }}>Loading...</h1>
             )
         }
         else if (data !== "Loading" && Object.keys(data).length === 0) {
@@ -41,10 +40,39 @@ class App extends Component {
                 <h1>Sorry, the API server seems to be down!</h1>
             )
         }
+
         else if(data !== "Loading" && Object.keys(data).length !== 0) {
-            console.log(data)
+            console.log(data);            
+            
+            const productsComponents = data.map(function(product, index){ 
+                return(
+                    <Products key={ index }
+                            index = { index+1 }
+                            title={product['Title']}
+                            category={product['Category']}
+                            details={product['Details']}
+                            asin={product['ASIN']}
+                            images={product['Images']}
+                    />
+                )            
+            });
+
+            console.log("prod comp : ", productsComponents)
             return (
-                <ProductsList />
+                <table className="table table-hover">
+                    <thead>
+                        <tr>
+                        <th scope="col">Index</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Details</th>
+                        <th scope="col">ASIN</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        { productsComponents }
+                    </tbody>
+                </table>
             );
         }
     }
