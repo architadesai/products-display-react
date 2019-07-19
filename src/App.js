@@ -1,16 +1,28 @@
 import React, {Component} from 'react';
 import './App.css';
 import Products from './components/products/Products';
-
+import ProductDetail from './components/products/ProductDetail';
 
 class App extends Component {
+
     constructor() {
         super();
         this.state = {
             products: {},
-            loading: false 
+            loading: false,
+            showProductDetail: false,
+            productDetailID: -1
         }
+        this.handleProductClick = this.handleProductClick.bind(this);
     }
+
+    handleProductClick(event, product_id) {
+        this.setState({
+            showProductDetail: true,
+            productDetailID: product_id
+        });
+    }
+
 
     componentDidMount() {
         this.setState({
@@ -25,26 +37,51 @@ class App extends Component {
                         loading: false,
                         products: data['data'][0]['amazon_data']
                     })
+                    
+                    // Assign 'id' to products
+                    let new_products_dict = this.state.products;
+                    let length = new_products_dict.length;
+                    
+                    for(let i=0; i<length; i++) {
+                        new_products_dict[i]['id'] = i;
+                    }
+                    this.setState({
+                        products: new_products_dict
+                    });
                 })
     }
 
     render() {
-        const data = this.state.loading ? "Loading" : this.state.products;
-        if(data === "Loading") {
+        const products = this.state.loading ? "Loading" : this.state.products;
+        if(products === "Loading") {
             return (
                 <h1 className="text-center" style={{ marginTop: '15%' }}>Loading...</h1>
             )
         }
-        else if (data !== "Loading" && Object.keys(data).length === 0) {
+        else if (products !== "Loading" && Object.keys(products).length === 0) {
             return (
                 <h1>Sorry, the API server seems to be down!</h1>
             )
         }
 
-        else if(data !== "Loading" && Object.keys(data).length !== 0) {
-            console.log(data);            
+        else if(products !== "Loading" && Object.keys(products).length !== 0) {
             
-            const productsComponents = data.map(function(product, index){ 
+            // When a specific product will be displayed
+            if(this.state.showProductDetail === true) {
+                let product_id = this.state.productDetailID;
+                return(
+                    <ProductDetail 
+                        title={products[product_id]['Title']}
+                        category={products[product_id]['Category']}
+                        details={products[product_id]['Details']}
+                        asin={products[product_id]['ASIN']}
+                        images={products[product_id]['Images']}
+                    />
+                )
+            }
+            
+            let self = this;
+            const productsComponents = products.map(function(product, index){ 
                 return(
                     <Products key={ index }
                             index = { index+1 }
@@ -52,12 +89,10 @@ class App extends Component {
                             category={product['Category']}
                             details={product['Details']}
                             asin={product['ASIN']}
-                            images={product['Images']}
+                            onProductClick={self.handleProductClick}
                     />
                 )            
             });
-
-            console.log("prod comp : ", productsComponents)
             return (
                 <table className="table table-hover">
                     <thead>
